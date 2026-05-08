@@ -1,243 +1,648 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Virtual Waiting Room Callback List</title>
-    <style>
-        /* NHS BRANDING */
-        :root {
-            --nhs-blue: #005EB8;
-            --nhs-dark-blue: #003087;
-            --nhs-light-blue: #41B6E6;
-            --nhs-grey: #768692;
-            --nhs-warm-yellow: #FFB81C;
-            --nhs-deep-green: #007F3B;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Virtual NHS Waiting Room (Demo)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'nhs-blue':        '#005EB8',
+            'nhs-blue-dark':   '#003D78',
+            'nhs-blue-light':  '#0072CE',
+            'nhs-green':       '#009639',
+            'nhs-warm-yellow': '#FFB81C',
+            'nhs-red':         '#DA291C',
+            'nhs-pale-grey':   '#F0F4F5',
+            'nhs-mid-grey':    '#AEB7BD',
+            'nhs-dark-grey':   '#425563',
+          },
+          fontFamily: {
+            sans: ['"Frutiger W01"', '"Frutiger"', 'Arial', 'sans-serif'],
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    /* NHS-style focus ring for accessibility */
+    :focus-visible {
+      outline: 3px solid #FFB81C;
+      outline-offset: 2px;
+    }
+    /* Subtle table row hover */
+    tbody tr:hover {
+      background-color: #f0f4f5;
+    }
+    /* Priority badge base */
+    .priority-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.65rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.025em;
+    }
+    .priority-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    /* Status badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.2rem 0.65rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    /* NHS button */
+    .btn-nhs-primary {
+      background-color: #005EB8;
+      color: #fff;
+      padding: 0.35rem 0.85rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: background-color 0.15s;
+      white-space: nowrap;
+    }
+    .btn-nhs-primary:hover { background-color: #003D78; }
+    .btn-nhs-primary:active { background-color: #002A57; }
 
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            margin: 0;
-            background-color: #f8f9fa;
-        }
+    .btn-nhs-secondary {
+      background-color: #fff;
+      color: #005EB8;
+      padding: 0.35rem 0.85rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: 2px solid #005EB8;
+      cursor: pointer;
+      transition: background-color 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .btn-nhs-secondary:hover { background-color: #005EB8; color: #fff; }
 
-        /* TOP NAV BAR */
-        .navbar {
-            background-color: var(--nhs-blue);
-            padding: 10px 40px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            color: white;
-        }
-
-        .navbar-left {
-            display: flex;
-            align-items: center;
-        }
-
-        .navbar-left img {
-            height: 45px;
-            margin-right: 20px;
-        }
-
-        /* BUTTON‑STYLE NAVIGATION LINKS */
-        .nav-buttons {
-            display: flex;
-            gap: 15px;
-        }
-
-        .nav-button {
-            background-color: var(--nhs-deep-green);
-            color: white;
-            padding: 10px 18px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: bold;
-            border: 2px solid white;
-            transition: 0.2s;
-        }
-
-        .nav-button:hover {
-            background-color: var(--nhs-dark-blue);
-        }
-
-        /* PAGE CONTENT */
-        .page-content {
-            padding: 40px;
-        }
-
-        h1 {
-            color: var(--nhs-dark-blue);
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .intro-text {
-            font-size: 16px;
-            margin-bottom: 30px;
-            color: #333;
-            line-height: 1.6;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 25px;
-            background: white;
-        }
-
-        th {
-            background-color: var(--nhs-blue);
-            color: white;
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: left;
-            font-size: 14px;
-        }
-
-        td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            font-size: 14px;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        button {
-            background-color: var(--nhs-blue);
-            color: white;
-            padding: 12px 25px;
-            font-size: 16px;
-            border: none;
-            cursor: pointer;
-            display: block;
-            margin: 20px auto 40px auto;
-            border-radius: 4px;
-        }
-
-        button:hover {
-            background-color: var(--nhs-dark-blue);
-        }
-
-        /* BANNER IMAGE */
-        .banner {
-            width: 100%;
-            margin-top: 40px;
-            text-align: center;
-        }
-
-        .banner img {
-            width: 100%;
-            border-radius: 4px;
-            max-height: 320px;
-            object-fit: cover;
-        }
-    </style>
+    /* Responsive table wrapper */
+    .table-scroll { overflow-x: auto; }
+  </style>
 </head>
+<body class="bg-nhs-pale-grey text-nhs-dark-grey font-sans min-h-screen">
 
-<body>
+  <!-- ============================================================
+       HEADER
+       ============================================================ -->
+  <header class="bg-nhs-blue text-white shadow-md" role="banner">
+    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- NHS Wordmark (text-based, no copyrighted logo) -->
+        <div class="flex items-center gap-4">
+          <div class="bg-white text-nhs-blue font-extrabold text-xl px-3 py-1 rounded select-none tracking-tight" aria-label="NHS">
+            NHS
+          </div>
+          <div>
+            <p class="text-white font-semibold text-base leading-tight">Virtual NHS Waiting Room</p>
+            <p class="text-blue-200 text-xs">NHS England &mdash; Digital Clinical Services</p>
+          </div>
+        </div>
+        <!-- Right-hand header info -->
+        <div class="hidden sm:flex items-center gap-6 text-sm text-blue-100">
+          <span>&#128100; Dr. A. Patel <span class="text-blue-300">(Admin)</span></span>
+          <span class="text-blue-300">|</span>
+          <span id="live-clock" class="font-mono tabular-nums"></span>
+          <script>
+            (function () {
+              function tick() {
+                const el = document.getElementById('live-clock');
+                if (el) el.textContent = new Date().toLocaleTimeString('en-GB');
+              }
+              tick();
+              setInterval(tick, 1000);
+            })();
+          </script>
+        </div>
+      </div>
+    </div>
+  </header>
 
-<!-- TOP NAVIGATION BAR WITH NHS 111 LOGO -->
-<div class="navbar">
-    <div class="navbar-left">
-        <img src="https://raw.githubusercontent.com/BennyBowen/Virtual-Waiting-Room/main/NHS%20111%20Logo.png">
+  <!-- ============================================================
+       DISCLAIMER BANNER
+       ============================================================ -->
+  <div class="bg-nhs-warm-yellow text-gray-900" role="alert" aria-live="polite">
+    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center gap-3 text-sm font-semibold">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+      </svg>
+      <span>&#9888;&#65039; DEMONSTRATION SYSTEM &mdash; This is a demonstration system using fictional patient data only. Not for clinical use. No real patient data is present.</span>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MAIN CONTENT
+       ============================================================ -->
+  <main class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10" id="main-content">
+
+    <!-- Page heading -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <h1 class="text-2xl font-bold text-nhs-blue">Virtual NHS Waiting Room <span class="text-nhs-mid-grey font-normal text-base">(Demo)</span></h1>
+        <p class="text-sm text-nhs-dark-grey mt-1">Manage patient callbacks and waiting room status in real time.</p>
+      </div>
+      <div class="flex gap-3">
+        <button class="btn-nhs-secondary" type="button" aria-label="Refresh patient lists">&#8635; Refresh</button>
+        <button class="btn-nhs-primary" type="button">+ Add Patient</button>
+      </div>
     </div>
 
-    <div class="nav-buttons">
-        <a class="nav-button">Dashboard</a>
-        <a class="nav-button">Callback List</a>
-        <a class="nav-button">Clinician Directory</a>
-        <a class="nav-button">Reports</a>
-        <a class="nav-button">Settings</a>
+    <!-- ============================================================
+         SECTION A: CALLBACK LIST
+         ============================================================ -->
+    <section aria-labelledby="callback-heading">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-3">
+          <h2 id="callback-heading" class="text-lg font-bold text-nhs-blue">A. Callback List</h2>
+          <span class="bg-nhs-blue text-white text-xs font-bold px-2 py-0.5 rounded-full">7 patients</span>
+        </div>
+        <div class="flex items-center gap-2 text-sm">
+          <label for="callback-filter" class="text-nhs-dark-grey font-medium">Filter:</label>
+          <select id="callback-filter" class="border border-nhs-mid-grey rounded px-2 py-1 text-sm bg-white focus:outline-none" aria-label="Filter callback list by status">
+            <option>All statuses</option>
+            <option>Not Contacted</option>
+            <option>Attempted</option>
+            <option>Connected</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="bg-white shadow-sm rounded-lg border border-gray-200 table-scroll">
+        <table class="min-w-full divide-y divide-gray-200 text-sm" aria-label="Callback list">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-nhs-dark-grey uppercase tracking-wider whitespace-nowrap">Case No.</th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-nhs-dark-grey uppercase tracking-wider whitespace-nowrap">Date &amp; Time</th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-nhs-dark-grey uppercase tracking-wider">Title</th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-nhs-dark-grey uppercase tracking-wider whitespace-nowrap">First Name</th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-nhs-dark-grey uppercase tracking-wider whitespace-nowrap">Last Name</th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-nhs-dark-grey uppercase tracking-wider whitespace-nowrap">NHS Number</th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-nhs-dark-grey uppercase tracking-wider whitespace-nowrap">NI Number</th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-nhs-dark-grey uppercase tracking-wider">Priority</th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-nhs-dark-grey uppercase tracking-wider">Clinician</th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-nhs-dark-grey uppercase tracking-wider whitespace-nowrap">Contact Status</th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-nhs-dark-grey uppercase tracking-wider whitespace-nowrap">Contact ID</th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-nhs-dark-grey uppercase tracking-wider whitespace-nowrap">Phone Number</th>
+              <th scope="col" class="px-3 py-3 text-center text-xs font-semibold text-nhs-dark-grey uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-100">
+
+            <!-- Row 1 -->
+            <tr>
+              <td class="px-3 py-3 font-mono text-nhs-blue font-semibold whitespace-nowrap">CB-2024-001</td>
+              <td class="px-3 py-3 whitespace-nowrap text-gray-600">08 May 2026<br/><span class="text-xs text-nhs-mid-grey">09:15</span></td>
+              <td class="px-3 py-3">Mr</td>
+              <td class="px-3 py-3 font-medium whitespace-nowrap">James</td>
+              <td class="px-3 py-3 font-medium whitespace-nowrap">Placeholder</td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap text-gray-600">999 111 2233</td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap text-gray-600">ZZ 12 34 56 A</td>
+              <td class="px-3 py-3">
+                <span class="priority-badge bg-red-100 text-red-700">
+                  <span class="priority-dot bg-red-600"></span>High
+                </span>
+              </td>
+              <td class="px-3 py-3 whitespace-nowrap">Dr. S. Morgan</td>
+              <td class="px-3 py-3">
+                <span class="status-badge bg-gray-100 text-gray-600">Not Contacted</span>
+              </td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap text-gray-500">CTX-88001</td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap">999 123 4567</td>
+              <td class="px-3 py-3 text-center">
+                <div class="flex gap-2 justify-center flex-wrap">
+                  <button class="btn-nhs-primary" type="button" aria-label="Trigger outbound call for James Placeholder">&#128222; Call</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 2 -->
+            <tr>
+              <td class="px-3 py-3 font-mono text-nhs-blue font-semibold whitespace-nowrap">CB-2024-002</td>
+              <td class="px-3 py-3 whitespace-nowrap text-gray-600">08 May 2026<br/><span class="text-xs text-nhs-mid-grey">09:30</span></td>
+              <td class="px-3 py-3">Mrs</td>
+              <td class="px-3 py-3 font-medium whitespace-nowrap">Patricia</td>
+              <td class="px-3 py-3 font-medium whitespace-nowrap">Example</td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap text-gray-600">999 222 3344</td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap text-gray-600">ZZ 23 45 67 B</td>
+              <td class="px-3 py-3">
+                <span class="priority-badge bg-amber-100 text-amber-700">
+                  <span class="priority-dot bg-amber-500"></span>Medium
+                </span>
+              </td>
+              <td class="px-3 py-3 whitespace-nowrap">Dr. F. Okafor</td>
+              <td class="px-3 py-3">
+                <span class="status-badge bg-amber-100 text-amber-700">Attempted</span>
+              </td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap text-gray-500">CTX-88002</td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap">999 234 5678</td>
+              <td class="px-3 py-3 text-center">
+                <div class="flex gap-2 justify-center flex-wrap">
+                  <button class="btn-nhs-primary" type="button" aria-label="Trigger outbound call for Patricia Example">&#128222; Call</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 3 -->
+            <tr>
+              <td class="px-3 py-3 font-mono text-nhs-blue font-semibold whitespace-nowrap">CB-2024-003</td>
+              <td class="px-3 py-3 whitespace-nowrap text-gray-600">08 May 2026<br/><span class="text-xs text-nhs-mid-grey">09:45</span></td>
+              <td class="px-3 py-3">Ms</td>
+              <td class="px-3 py-3 font-medium whitespace-nowrap">Sarah</td>
+              <td class="px-3 py-3 font-medium whitespace-nowrap">Testington</td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap text-gray-600">999 333 4455</td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap text-gray-600">ZZ 34 56 78 C</td>
+              <td class="px-3 py-3">
+                <span class="priority-badge bg-green-100 text-green-700">
+                  <span class="priority-dot bg-green-600"></span>Low
+                </span>
+              </td>
+              <td class="px-3 py-3 whitespace-nowrap">Dr. S. Morgan</td>
+              <td class="px-3 py-3">
+                <span class="status-badge bg-green-100 text-green-700">Connected</span>
+              </td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap text-gray-500">CTX-88003</td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap">999 345 6789</td>
+              <td class="px-3 py-3 text-center">
+                <div class="flex gap-2 justify-center flex-wrap">
+                  <button class="btn-nhs-primary" type="button" aria-label="Trigger outbound call for Sarah Testington">&#128222; Call</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 4 -->
+            <tr>
+              <td class="px-3 py-3 font-mono text-nhs-blue font-semibold whitespace-nowrap">CB-2024-004</td>
+              <td class="px-3 py-3 whitespace-nowrap text-gray-600">08 May 2026<br/><span class="text-xs text-nhs-mid-grey">10:00</span></td>
+              <td class="px-3 py-3">Mr</td>
+              <td class="px-3 py-3 font-medium whitespace-nowrap">Robert</td>
+              <td class="px-3 py-3 font-medium whitespace-nowrap">Demofield</td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap text-gray-600">999 444 5566</td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap text-gray-600">ZZ 45 67 89 D</td>
+              <td class="px-3 py-3">
+                <span class="priority-badge bg-red-100 text-red-700">
+                  <span class="priority-dot bg-red-600"></span>High
+                </span>
+              </td>
+              <td class="px-3 py-3 whitespace-nowrap">Dr. H. Patel</td>
+              <td class="px-3 py-3">
+                <span class="status-badge bg-gray-100 text-gray-600">Not Contacted</span>
+              </td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap text-gray-500">CTX-88004</td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap">999 456 7890</td>
+              <td class="px-3 py-3 text-center">
+                <div class="flex gap-2 justify-center flex-wrap">
+                  <button class="btn-nhs-primary" type="button" aria-label="Trigger outbound call for Robert Demofield">&#128222; Call</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 5 -->
+            <tr>
+              <td class="px-3 py-3 font-mono text-nhs-blue font-semibold whitespace-nowrap">CB-2024-005</td>
+              <td class="px-3 py-3 whitespace-nowrap text-gray-600">08 May 2026<br/><span class="text-xs text-nhs-mid-grey">10:15</span></td>
+              <td class="px-3 py-3">Dr</td>
+              <td class="px-3 py-3 font-medium whitespace-nowrap">Angela</td>
+              <td class="px-3 py-3 font-medium whitespace-nowrap">Sampleworth</td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap text-gray-600">999 555 6677</td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap text-gray-600">ZZ 56 78 90 E</td>
+              <td class="px-3 py-3">
+                <span class="priority-badge bg-amber-100 text-amber-700">
+                  <span class="priority-dot bg-amber-500"></span>Medium
+                </span>
+              </td>
+              <td class="px-3 py-3 whitespace-nowrap">Dr. F. Okafor</td>
+              <td class="px-3 py-3">
+                <span class="status-badge bg-amber-100 text-amber-700">Attempted</span>
+              </td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap text-gray-500">CTX-88005</td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap">999 567 8901</td>
+              <td class="px-3 py-3 text-center">
+                <div class="flex gap-2 justify-center flex-wrap">
+                  <button class="btn-nhs-primary" type="button" aria-label="Trigger outbound call for Angela Sampleworth">&#128222; Call</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 6 -->
+            <tr>
+              <td class="px-3 py-3 font-mono text-nhs-blue font-semibold whitespace-nowrap">CB-2024-006</td>
+              <td class="px-3 py-3 whitespace-nowrap text-gray-600">08 May 2026<br/><span class="text-xs text-nhs-mid-grey">10:30</span></td>
+              <td class="px-3 py-3">Miss</td>
+              <td class="px-3 py-3 font-medium whitespace-nowrap">Chloe</td>
+              <td class="px-3 py-3 font-medium whitespace-nowrap">Fictive</td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap text-gray-600">999 666 7788</td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap text-gray-600">ZZ 67 89 01 F</td>
+              <td class="px-3 py-3">
+                <span class="priority-badge bg-green-100 text-green-700">
+                  <span class="priority-dot bg-green-600"></span>Low
+                </span>
+              </td>
+              <td class="px-3 py-3 whitespace-nowrap">Dr. H. Patel</td>
+              <td class="px-3 py-3">
+                <span class="status-badge bg-gray-100 text-gray-600">Not Contacted</span>
+              </td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap text-gray-500">CTX-88006</td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap">999 678 9012</td>
+              <td class="px-3 py-3 text-center">
+                <div class="flex gap-2 justify-center flex-wrap">
+                  <button class="btn-nhs-primary" type="button" aria-label="Trigger outbound call for Chloe Fictive">&#128222; Call</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 7 -->
+            <tr>
+              <td class="px-3 py-3 font-mono text-nhs-blue font-semibold whitespace-nowrap">CB-2024-007</td>
+              <td class="px-3 py-3 whitespace-nowrap text-gray-600">08 May 2026<br/><span class="text-xs text-nhs-mid-grey">10:45</span></td>
+              <td class="px-3 py-3">Mr</td>
+              <td class="px-3 py-3 font-medium whitespace-nowrap">Thomas</td>
+              <td class="px-3 py-3 font-medium whitespace-nowrap">Notreal</td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap text-gray-600">999 777 8899</td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap text-gray-600">ZZ 78 90 12 G</td>
+              <td class="px-3 py-3">
+                <span class="priority-badge bg-red-100 text-red-700">
+                  <span class="priority-dot bg-red-600"></span>High
+                </span>
+              </td>
+              <td class="px-3 py-3 whitespace-nowrap">Dr. S. Morgan</td>
+              <td class="px-3 py-3">
+                <span class="status-badge bg-amber-100 text-amber-700">Attempted</span>
+              </td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap text-gray-500">CTX-88007</td>
+              <td class="px-3 py-3 font-mono whitespace-nowrap">999 789 0123</td>
+              <td class="px-3 py-3 text-center">
+                <div class="flex gap-2 justify-center flex-wrap">
+                  <button class="btn-nhs-primary" type="button" aria-label="Trigger outbound call for Thomas Notreal">&#128222; Call</button>
+                </div>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Callback list legend -->
+      <div class="mt-3 flex flex-wrap gap-4 text-xs text-nhs-dark-grey">
+        <span class="flex items-center gap-1"><span class="priority-dot bg-red-600"></span> High priority</span>
+        <span class="flex items-center gap-1"><span class="priority-dot bg-amber-500"></span> Medium priority</span>
+        <span class="flex items-center gap-1"><span class="priority-dot bg-green-600"></span> Low priority</span>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SECTION B: WAITING ROOM LIST
+         ============================================================ -->
+    <section aria-labelledby="waitingroom-heading">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-3">
+          <h2 id="waitingroom-heading" class="text-lg font-bold text-nhs-blue">B. Waiting Room</h2>
+          <span class="bg-nhs-green text-white text-xs font-bold px-2 py-0.5 rounded-full">5 patients</span>
+        </div>
+        <div class="flex items-center gap-2 text-sm text-nhs-dark-grey">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-nhs-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" stroke-width="2"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"/>
+          </svg>
+          <span>Live &mdash; auto-updates every 60s</span>
+        </div>
+      </div>
+
+      <div class="bg-white shadow-sm rounded-lg border border-gray-200 table-scroll">
+        <table class="min-w-full divide-y divide-gray-200 text-sm" aria-label="Waiting room list">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-nhs-dark-grey uppercase tracking-wider whitespace-nowrap">Case No.</th>
+              <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-nhs-dark-grey uppercase tracking-wider whitespace-nowrap">Patient Name</th>
+              <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-nhs-dark-grey uppercase tracking-wider">Priority</th>
+              <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-nhs-dark-grey uppercase tracking-wider">Clinician</th>
+              <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-nhs-dark-grey uppercase tracking-wider whitespace-nowrap">Time Entered</th>
+              <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-nhs-dark-grey uppercase tracking-wider">Wait Time</th>
+              <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-nhs-dark-grey uppercase tracking-wider">Status</th>
+              <th scope="col" class="px-4 py-3 text-center text-xs font-semibold text-nhs-dark-grey uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-100">
+
+            <!-- WR Row 1 -->
+            <tr>
+              <td class="px-4 py-3 font-mono text-nhs-blue font-semibold whitespace-nowrap">WR-2024-021</td>
+              <td class="px-4 py-3 font-medium whitespace-nowrap">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-full bg-nhs-blue text-white flex items-center justify-center text-xs font-bold flex-shrink-0" aria-hidden="true">JP</div>
+                  <span>Mr James Placeholder</span>
+                </div>
+              </td>
+              <td class="px-4 py-3">
+                <span class="priority-badge bg-red-100 text-red-700">
+                  <span class="priority-dot bg-red-600"></span>High
+                </span>
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap">Dr. S. Morgan</td>
+              <td class="px-4 py-3 whitespace-nowrap text-gray-600">08:47</td>
+              <td class="px-4 py-3 whitespace-nowrap">
+                <span class="text-red-600 font-semibold">28 min</span>
+              </td>
+              <td class="px-4 py-3">
+                <span class="status-badge bg-blue-100 text-blue-700">
+                  <span class="w-2 h-2 rounded-full bg-blue-500 mr-1 inline-block animate-pulse"></span>
+                  Waiting
+                </span>
+              </td>
+              <td class="px-4 py-3 text-center">
+                <div class="flex gap-2 justify-center flex-wrap">
+                  <button class="btn-nhs-primary" type="button" aria-label="Begin consultation with James Placeholder">&#9654; Begin Consult</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- WR Row 2 -->
+            <tr>
+              <td class="px-4 py-3 font-mono text-nhs-blue font-semibold whitespace-nowrap">WR-2024-022</td>
+              <td class="px-4 py-3 font-medium whitespace-nowrap">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-full bg-nhs-blue-dark text-white flex items-center justify-center text-xs font-bold flex-shrink-0" aria-hidden="true">RT</div>
+                  <span>Mrs Rita Testdata</span>
+                </div>
+              </td>
+              <td class="px-4 py-3">
+                <span class="priority-badge bg-amber-100 text-amber-700">
+                  <span class="priority-dot bg-amber-500"></span>Medium
+                </span>
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap">Dr. F. Okafor</td>
+              <td class="px-4 py-3 whitespace-nowrap text-gray-600">09:02</td>
+              <td class="px-4 py-3 whitespace-nowrap">
+                <span class="text-amber-600 font-semibold">13 min</span>
+              </td>
+              <td class="px-4 py-3">
+                <span class="status-badge bg-nhs-green text-white">
+                  <span class="w-2 h-2 rounded-full bg-green-300 mr-1 inline-block"></span>
+                  In Consultation
+                </span>
+              </td>
+              <td class="px-4 py-3 text-center">
+                <div class="flex gap-2 justify-center flex-wrap">
+                  <button class="btn-nhs-primary" type="button" aria-label="Resume consultation with Rita Testdata">&#9654; Resume</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- WR Row 3 -->
+            <tr>
+              <td class="px-4 py-3 font-mono text-nhs-blue font-semibold whitespace-nowrap">WR-2024-023</td>
+              <td class="px-4 py-3 font-medium whitespace-nowrap">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-full bg-nhs-blue text-white flex items-center justify-center text-xs font-bold flex-shrink-0" aria-hidden="true">PF</div>
+                  <span>Mr Peter Fakenam</span>
+                </div>
+              </td>
+              <td class="px-4 py-3">
+                <span class="priority-badge bg-green-100 text-green-700">
+                  <span class="priority-dot bg-green-600"></span>Low
+                </span>
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap">Dr. H. Patel</td>
+              <td class="px-4 py-3 whitespace-nowrap text-gray-600">09:10</td>
+              <td class="px-4 py-3 whitespace-nowrap">
+                <span class="text-gray-600 font-semibold">5 min</span>
+              </td>
+              <td class="px-4 py-3">
+                <span class="status-badge bg-blue-100 text-blue-700">
+                  <span class="w-2 h-2 rounded-full bg-blue-500 mr-1 inline-block animate-pulse"></span>
+                  Waiting
+                </span>
+              </td>
+              <td class="px-4 py-3 text-center">
+                <div class="flex gap-2 justify-center flex-wrap">
+                  <button class="btn-nhs-primary" type="button" aria-label="Begin consultation with Peter Fakenam">&#9654; Begin Consult</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- WR Row 4 -->
+            <tr>
+              <td class="px-4 py-3 font-mono text-nhs-blue font-semibold whitespace-nowrap">WR-2024-024</td>
+              <td class="px-4 py-3 font-medium whitespace-nowrap">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-full bg-nhs-blue-dark text-white flex items-center justify-center text-xs font-bold flex-shrink-0" aria-hidden="true">EL</div>
+                  <span>Ms Eleanor Lorem</span>
+                </div>
+              </td>
+              <td class="px-4 py-3">
+                <span class="priority-badge bg-red-100 text-red-700">
+                  <span class="priority-dot bg-red-600"></span>High
+                </span>
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap">Dr. S. Morgan</td>
+              <td class="px-4 py-3 whitespace-nowrap text-gray-600">09:05</td>
+              <td class="px-4 py-3 whitespace-nowrap">
+                <span class="text-red-600 font-semibold">10 min</span>
+              </td>
+              <td class="px-4 py-3">
+                <span class="status-badge bg-nhs-green text-white">
+                  <span class="w-2 h-2 rounded-full bg-green-300 mr-1 inline-block"></span>
+                  In Consultation
+                </span>
+              </td>
+              <td class="px-4 py-3 text-center">
+                <div class="flex gap-2 justify-center flex-wrap">
+                  <button class="btn-nhs-primary" type="button" aria-label="Resume consultation with Eleanor Lorem">&#9654; Resume</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- WR Row 5 -->
+            <tr>
+              <td class="px-4 py-3 font-mono text-nhs-blue font-semibold whitespace-nowrap">WR-2024-025</td>
+              <td class="px-4 py-3 font-medium whitespace-nowrap">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-full bg-nhs-blue text-white flex items-center justify-center text-xs font-bold flex-shrink-0" aria-hidden="true">GS</div>
+                  <span>Mr George Sample</span>
+                </div>
+              </td>
+              <td class="px-4 py-3">
+                <span class="priority-badge bg-amber-100 text-amber-700">
+                  <span class="priority-dot bg-amber-500"></span>Medium
+                </span>
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap">Dr. F. Okafor</td>
+              <td class="px-4 py-3 whitespace-nowrap text-gray-600">09:14</td>
+              <td class="px-4 py-3 whitespace-nowrap">
+                <span class="text-gray-600 font-semibold">1 min</span>
+              </td>
+              <td class="px-4 py-3">
+                <span class="status-badge bg-blue-100 text-blue-700">
+                  <span class="w-2 h-2 rounded-full bg-blue-500 mr-1 inline-block animate-pulse"></span>
+                  Waiting
+                </span>
+              </td>
+              <td class="px-4 py-3 text-center">
+                <div class="flex gap-2 justify-center flex-wrap">
+                  <button class="btn-nhs-primary" type="button" aria-label="Begin consultation with George Sample">&#9654; Begin Consult</button>
+                </div>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Summary stats row -->
+      <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="bg-white rounded-lg border border-gray-200 px-4 py-3 text-center">
+          <p class="text-2xl font-bold text-nhs-blue">5</p>
+          <p class="text-xs text-nhs-dark-grey mt-0.5">Total in Room</p>
+        </div>
+        <div class="bg-white rounded-lg border border-gray-200 px-4 py-3 text-center">
+          <p class="text-2xl font-bold text-blue-500">3</p>
+          <p class="text-xs text-nhs-dark-grey mt-0.5">Waiting</p>
+        </div>
+        <div class="bg-white rounded-lg border border-gray-200 px-4 py-3 text-center">
+          <p class="text-2xl font-bold text-nhs-green">2</p>
+          <p class="text-xs text-nhs-dark-grey mt-0.5">In Consultation</p>
+        </div>
+        <div class="bg-white rounded-lg border border-gray-200 px-4 py-3 text-center">
+          <p class="text-2xl font-bold text-red-500">2</p>
+          <p class="text-xs text-nhs-dark-grey mt-0.5">High Priority</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="mt-12 border-t border-gray-200 bg-white" role="contentinfo">
+    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-nhs-mid-grey">
+      <div class="flex items-center gap-2">
+        <div class="bg-nhs-blue text-white font-extrabold text-xs px-2 py-0.5 rounded" aria-hidden="true">NHS</div>
+        <span>&copy; 2026 NHS England &mdash; Digital Clinical Services</span>
+      </div>
+      <div class="flex gap-4">
+        <span class="text-nhs-warm-yellow font-semibold">&#9888; DEMO ONLY &mdash; Fictional data</span>
+        <span>v0.9.4-demo</span>
+        <a href="#" class="underline hover:text-nhs-blue">Accessibility</a>
+        <a href="#" class="underline hover:text-nhs-blue">Privacy</a>
+      </div>
     </div>
-</div>
-
-<div class="page-content">
-
-    <h1>Virtual Waiting Room Callback List</h1>
-
-    <p class="intro-text">
-        Welcome to the NHS 111 Virtual Waiting Room Management Console. Within this console you can 
-        review all the cases pending callback, start callbacks and assign those cases to different Clinicians.
-    </p>
-
-    <table>
-        <thead>
-        <tr>
-            <th>Case Number</th>
-            <th>Date & Time</th>
-            <th>Patient Title</th>
-            <th>Patient First Name</th>
-            <th>Patient Last Name</th>
-            <th>NHS Number</th>
-            <th>NI Number</th>
-            <th>Priority</th>
-            <th>Clinician</th>
-            <th>Contact Status</th>
-            <th>Contact ID</th>
-            <th>Patient Phone Number</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        <tr>
-            <td>VR-10583</td>
-            <td>24/02/2026 10:15</td>
-            <td>Mr</td>
-            <td>Oliver</td>
-            <td>Grant</td>
-            <td>643 829 0011</td>
-            <td>AB123456C</td>
-            <td>High</td>
-            <td>Dr Sarah Jones</td>
-            <td>Pending</td>
-            <td>CID-4883</td>
-            <td>07123 445566</td>
-        </tr>
-
-        <tr>
-            <td>VR-10584</td>
-            <td>24/02/2026 10:22</td>
-            <td>Ms</td>
-            <td>Aisha</td>
-            <td>Williams</td>
-            <td>712 993 5501</td>
-            <td>CD789012F</td>
-            <td>Medium</td>
-            <td>Dr Mark Evans</td>
-            <td>Not Answered</td>
-            <td>CID-4884</td>
-            <td>07988 112233</td>
-        </tr>
-
-        <tr>
-            <td>VR-10585</td>
-            <td>24/02/2026 11:05</td>
-            <td>Mrs</td>
-            <td>Helen</td>
-            <td>Patel</td>
-            <td>589 201 3309</td>
-            <td>EF456789D</td>
-            <td>Low</td>
-            <td>Dr Rachel Green</td>
-            <td>Complete</td>
-            <td>CID-4885</td>
-            <td>07855 667788</td>
-        </tr>
-        </tbody>
-    </table>
-
-    <button>Make Calls</button>
-
-    <!-- NHS 111 BANNER IMAGE -->
-    <div class="banner">
-        <img src="https://raw.githubusercontent.com/BennyBowen/Virtual-Waiting-Room/main/nhs-24-call-handler%20cropped.png" alt="nhs-24-call-handler cropped" alt="NHS 111 Banner">
-    </div>
-
-</div>
+  </footer>
 
 </body>
 </html>
